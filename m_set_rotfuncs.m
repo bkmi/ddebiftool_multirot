@@ -60,8 +60,8 @@ if isa(funcs.rotation,'double')
     end
 elseif isa(funcs.rotation,'cell')
     % test compatibility given MULTIPLE rotation matricies.
-    warning(['Compatibility testing is currently not supported for ', ...
-        'multiple rotation matricies.'])
+%     warning(['Compatibility testing is currently not supported for ', ...
+%         'multiple rotation matricies.'])
 end
 
 
