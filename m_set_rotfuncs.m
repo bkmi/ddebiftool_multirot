@@ -59,9 +59,65 @@ if isa(funcs.rotation,'double')
         error('rot~=-rot^T');
     end
 elseif isa(funcs.rotation,'cell')
-    % test compatibility given MULTIPLE rotation matricies.
-%     warning(['Compatibility testing is currently not supported for ', ...
-%         'multiple rotation matricies.'])
+    phi=linspace(0,2*pi,10);
+    for j = 1:numel(funcs.rotation)
+        for i= 1:length(phi)
+            
+            % create cell array that funcs.exp_rotation uses.
+            expVals = cell(numel(funcs.rotation),1);
+            for k = 1:numel(funcs.rotation)
+                if j == k
+                    % Case where the phi value goes, this rotation var
+                    expVals{k} = phi(i);
+                else
+                    % For the other rotation vars
+                    expVals{k} = 0;
+                end
+            end
+            
+            
+            err=expm(funcs.rotation{j}*phi(i))-funcs.exp_rotation(expVals{:});
+            if max(abs(err))>rot_tol
+                error(['exp(rot*phi)~=exp_rotation(phi) for phi=%g',phi(i),...
+                    'At funcs.rotation{',num2str(j),'}.']);
+            end
+        end
+        
+        % create cell array that funcs.exp_rotation uses.
+        expVals = cell(numel(funcs.rotation),1);
+        for k = 1:numel(funcs.rotation)
+            expVals{k} = 2*pi;
+        end
+        
+        err=funcs.exp_rotation(expVals{:})-eye(size(funcs.rotation{j}));
+        if max(abs(err))>rot_tol
+            error('exp(rot*2*pi)~=Id');
+        end
+        
+        err=funcs.rotation{j}+funcs.rotation{j}.';
+        if max(abs(err))>rot_tol
+            error('rot~=-rot^T');
+        end
+    end
+    
+    % Test random values for all matrix
+    rnd = rand(numel(funcs.rotation),1) * 2*pi;
+    rndMat = 0;
+    for i = 1:numel(funcs.rotation)
+        rndMat = rndMat + funcs.rotation{i}*rnd(i);
+    end
+    
+    % create cell array that funcs.exp_rotation uses.
+    expVals = cell(numel(funcs.rotation),1);
+    for k = 1:numel(funcs.rotation)
+        expVals{k} = rnd(k);
+    end
+    
+    err=expm(rndMat)-funcs.exp_rotation(expVals{:});
+    if max(abs(err))>rot_tol
+        error(['exp(rot*phi)~=exp_rotation(phi) for phi=%g',phi(i),...
+            'At funcs.rotation{',num2str(j),'}.']);
+    end
 end
 
 
